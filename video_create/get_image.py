@@ -38,11 +38,13 @@ class GetImage():
         capture = cv2.VideoCapture(video_path)
         if capture.isOpened() is False:
             raise FileNotFoundError('打开视频流错误')
+
         # 显示图像信息
         self.video_info(capture)
 
         while capture.isOpened():
             ret, frame = capture.read()
+
             if ret:
                 # 显示摄像头捕获的帧
                 cv2.imshow('Original frame from the video file', frame)
@@ -96,4 +98,4 @@ class GetImage():
 
 if __name__ == "__main__":
     a = GetImage()
-    a.display_video('./t.mp4', display_mode=1)
+    a.display_video('../resource/test.mp4', display_mode=1)
