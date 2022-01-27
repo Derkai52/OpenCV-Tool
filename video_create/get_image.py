@@ -8,6 +8,7 @@ class GetImage():
     def __init__(self):
         pass
 
+
     def video_info(self, capture, mode=0):
         try:
             print("================< 图像信息 >===================")
@@ -28,40 +29,45 @@ class GetImage():
             print("图像信息加载错误: ",e)
 
 
+
     def display_video(self, video_path, display_mode=0, video_fps=100):
         """
         显示视频流
         :param video_path: 视频文件路径
         :param display_mode: 显示模式(0:默认 1:灰度处理)
+        :param video_fps: 视频帧率(最大值)
         :return:
         """
+
         capture = cv2.VideoCapture(video_path)
         if capture.isOpened() is False:
             raise FileNotFoundError('打开视频流错误')
 
         # 显示图像信息
         self.video_info(capture)
-
+        fps = 0.0
         while capture.isOpened():
             ret, frame = capture.read()
-
+            start_time = time.time()
             if ret:
                 # 显示摄像头捕获的帧
                 cv2.imshow('Original frame from the video file', frame)
 
-                # 将图像进行处理后的展示
-                if display_mode == 1:
-                    gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) # 把摄像头捕捉到的帧转换为灰度
-                    cv2.imshow('Grayscale frame', gray_frame) # 显示处理后的帧
+                # # 将图像进行处理后的展示
+                # if display_mode == 1:
+                #     gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) # 把摄像头捕捉到的帧转换为灰度
+                #     cv2.imshow('Grayscale frame', gray_frame) # 显示处理后的帧
 
-                if (cv2.waitKey(int(1000/video_fps)) & 0xFF) == ord('q'):
+                if (cv2.waitKey(int(1000/video_fps+0.5)) & 0xFF) == ord('q'): # 准确到整数位的帧率上限控制
                     break
                 # print("FPS:{}".format(1000/(time.time()-start_time)))
-
+                fps = (fps + (1. / (time.time() - start_time))) / 2
+                print("FPS:",fps)
             else:
                 break
         capture.release()
         cv2.destroyAllWindows()
+
 
     def get_video_format(self, cap):
         """ 获取视频流编码格式 """
@@ -98,4 +104,4 @@ class GetImage():
 
 if __name__ == "__main__":
     a = GetImage()
-    a.display_video('../resource/test.mp4', display_mode=1)
+    a.display_video('../resource/test.mp4', display_mode=1, video_fps=25)
