@@ -9,6 +9,7 @@ import numpy as np
 #     modePutText(image, "Origin Image")
 
 
+
 def modePutText(image, text, fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=2, scaleMode=1, sizeMode=1):
     """
     模式化绘制字体，支持窗口自适应绘制、自定义绘制位置
