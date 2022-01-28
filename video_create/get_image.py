@@ -1,4 +1,3 @@
-
 import cv2
 import os
 import time
@@ -35,7 +34,7 @@ class GetImage():
         显示视频流
         :param video_path: 视频文件路径
         :param display_mode: 显示模式(0:默认 1:灰度处理)
-        :param video_fps: 视频帧率(最大值)
+        :param video_fps: 视频帧率(最大值) 默认值:100
         :return:
         """
 
@@ -53,10 +52,10 @@ class GetImage():
                 # 显示摄像头捕获的帧
                 cv2.imshow('Original frame from the video file', frame)
 
-                # # 将图像进行处理后的展示
-                # if display_mode == 1:
-                #     gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) # 把摄像头捕捉到的帧转换为灰度
-                #     cv2.imshow('Grayscale frame', gray_frame) # 显示处理后的帧
+                # 将图像进行处理后的展示
+                if display_mode == 1:
+                    gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) # 把摄像头捕捉到的帧转换为灰度
+                    cv2.imshow('Grayscale frame', gray_frame) # 显示处理后的帧
 
                 if (cv2.waitKey(int(1000/video_fps+0.5)) & 0xFF) == ord('q'): # 准确到整数位的帧率上限控制
                     break
