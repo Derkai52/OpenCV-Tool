@@ -93,10 +93,7 @@ class GetImage():
 
 
     def from_thirdparty(self):
-        """
-        从第三方设备获取图像（例如工业相机SDK）,待开发
-        :return:
-        """
+        """ 从第三方设备获取图像（例如工业相机SDK）,待开发:return: """
         pass
 
 
