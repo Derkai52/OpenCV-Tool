@@ -247,11 +247,11 @@ if __name__ == "__main__":
     image_res = cv2.imread(img_test_path)
     image_roi = cv2.imread('./test.png')
     print(image_res.shape)
-    image_with_boxes = a.add_background_randomly(image_res,image_res, box_list=[[1,[10,10,10,362,362,10,362,362]]])
+    image_with_boxes = a.perspective_tranform(image_res, label_box_list=[[1,[10,10,10,362,362,10,362,362]]])
 
 
 
-    cv2.imwrite("../resource/add_background_randomly.jpg", image_with_boxes[0])
+    # cv2.imwrite("../resource/perspective_tranform.jpg", image_with_boxes[0])
     cv2.imshow("test",image_with_boxes[0])
     cv2.waitKey(0)
     # cv2.imwrite(img_test_path, image_res)
