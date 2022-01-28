@@ -1,6 +1,12 @@
 import cv2
 import numpy as np
 
+# 基础库示例:
+#
+# from base.base import modePutText # 导入基础工具库
+# # 若导入基础工具库
+# if "base" in sys.modules:
+#     modePutText(image, "Origin Image")
 
 def modePutText(image, text, fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=2, scaleMode=1, sizeMode=1):
     """

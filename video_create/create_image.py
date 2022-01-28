@@ -7,11 +7,7 @@ from tqdm import tqdm
 import cv2
 import numpy as np
 import math, sys
-import shutil
-# from base.base import modePutText # 导入基础工具库
-# 若导入基础工具库
-if "base" in sys.modules:
-    modePutText(image, "Origin Image")
+
 
 class ImageEnhance():
 
@@ -185,7 +181,6 @@ class ImageEnhance():
         :return:
         """
         img_height, img_width = image.shape[:2]
-        # points_src = np.float32([[rect[0], rect[1]], [rect[2], rect[3]], [rect[4], rect[5]], [rect[6], rect[7]]])
         points_src = np.float32([[0, 0], [img_width - 1, 0], [img_width - 1, img_height - 1], [0, img_height - 1]])
         max_width = int(img_width * (1.0 + perspective_rate))
         max_height = int(img_height * (1.0 + perspective_rate))
@@ -202,8 +197,7 @@ class ImageEnhance():
         x3 = random.randint(0, delta_width)
         y3 = random.randint(delta_height + min_height, max_height)
         points_dst = np.float32([[x0, y0], [x1, y1], [x2, y2], [x3, y3]])
-        # width_new = max(x0, x1, x2, x3) - min(x0, x1, x2, x3)
-        # height_new = max(y0, y1, y2, y3) - min(y0, y1, y2, y3)
+
         M = cv2.getPerspectiveTransform(points_src, points_dst)
         image_res = cv2.warpPerspective(image, M, (max_width, max_height))
         # cut
@@ -237,18 +231,11 @@ class ImageEnhance():
 
 
 if __name__ == "__main__":
-    a = ImageEnhance()
-    test_path = './'
-    file_name = 'test.png'
-    img_test_path = os.path.join(test_path, file_name)
-    image_res = cv2.imread(img_test_path)
-    image_roi = cv2.imread('./test.png')
-    print(image_res.shape)
-    image_with_boxes = a.perspective_tranform(image_res)
+    image_test = ImageEnhance()
+    img_test_path = './test.png' # 测试图像路径
+    image = cv2.imread(img_test_path)
 
+    image_with_boxes = image_test.perspective_tranform(image) # 测试透视变换
 
-
-    # cv2.imwrite("../resource/perspective_tranform.jpg", image_with_boxes[0])
     cv2.imshow("test",image_with_boxes[0])
     cv2.waitKey(0)
-    # cv2.imwrite(img_test_path, image_res)
