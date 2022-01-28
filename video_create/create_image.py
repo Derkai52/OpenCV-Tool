@@ -9,15 +9,19 @@ import numpy as np
 import math, sys
 import shutil
 # from base.base import modePutText # 导入基础工具库
-
+# 若导入基础工具库
+if "base" in sys.modules:
+    modePutText(image, "Origin Image")
 
 class ImageEnhance():
 
     def add_background_randomly(self, image, background, box_list=[]):
         """
-        box_list = [(cls_type_0, rect_0), (cls_type_1, rect_1), ... , (cls_type_n, rect_n)]
-        rect = [x0, y0, x1, y1, x2, y2, x3, y3]
-        left_top = (x0, y0), right_top = (x1, y1), right_bottom = (x2, y2), left_bottom = (x3, y3)
+        自动添加背景
+        :param image: 前景图
+        :param background: 背景图
+        :param box_list: 点序列
+        :return:
         """
 
         img_height, img_width = image.shape[:2]
@@ -29,13 +33,10 @@ class ImageEnhance():
         max_size = min(bg_height, bg_width) // 5 * 4
         new_size = random.randint(min_size, max_size)
         resize_multiple = round(new_size / max(img_height, img_width), 4)
-        # image = image.resize((int(img_width * resize_multiple), int(img_height * resize_multiple)), Image.ANTIALIAS)
         image = cv2.resize(image, (int(img_width * resize_multiple), int(img_height * resize_multiple)))
         img_height, img_width = image.shape[:2]
 
         # 将图像粘贴到背景上
-        # height_pos = random.randint((bg_height-img_height)//3, (bg_height-img_height)//3*2)
-        # width_pos = random.randint((bg_width-img_width)//3, (bg_width-img_width)//3*2)
         height_pos = random.randint(0, (bg_height - img_height))
         width_pos = random.randint(0, (bg_width - img_width))
         background[height_pos:(height_pos + img_height), width_pos:(width_pos + img_width)] = image
@@ -63,12 +64,12 @@ class ImageEnhance():
         image_with_boxes = [background, new_box_list]
 
         # 绘制变更情况
-        self.display_rotate(image,box_ori_list, new_box_list)
+        self.display_diff(image, box_ori_list, new_box_list)
 
         return image_with_boxes
 
 
-    def display_rotate(self, image, box_ori_list, box_new_list):
+    def display_diff(self, image, box_ori_list, box_new_list):
         """ 绘制旋转变换后的差异 """
         # 显示原坐标点
         for (cls_type, box) in box_ori_list:
@@ -86,28 +87,19 @@ class ImageEnhance():
                            color=(0, 255, 0),
                            thickness=5)
 
-        # 若导入基础工具库
-        if "base" in sys.modules:
-            modePutText(image,"Origin Image")
-
 
     def rotate_image(self, image, label_box_list=[], angle=70, color=(0, 0, 0), img_scale=1.0):
         """
         按照角度进行旋转变换,背景默认用黑色填充(0,0,0)
         :param image: 输入图像
-        :param label_box_list: 四点序列
+        :param label_box_list: 图像点序列
         :param angle: 旋转角度
         :param color: 背景填充颜色(默认为 black(0,0,0) )
         :param img_scale: 缩放比例(默认为1)
         :return:
-
-        label_box = (cls_type, box)
-        box = [x0, y0, x1, y1, x2, y2, x3, y3]
         """
-        # grab the rotation matrix (applying the negative of the angle to rotate clockwise),
-        # then grab the sine and cosine (i.e., the rotation components of the matrix)
-        # if angle < 0, counterclockwise rotation; if angle > 0, clockwise rotation
-        # 1.0 - scale, to adjust the size scale (image scaling parameter), recommended 0.75
+
+        # 如果角度小于0，则逆时针旋转；如果角度>0，则顺时针旋转
         height_ori, width_ori = image.shape[:2]
         x_center_ori, y_center_ori = (width_ori // 2, height_ori // 2)
 
@@ -142,15 +134,21 @@ class ImageEnhance():
             box_new_list.append((cls_type, box_rot))
 
         # 显示变换差异
-        self.display_rotate(image_new, label_box_list, box_new_list)
+        self.display_diff(image_new, label_box_list, box_new_list)
 
         image_with_boxes = [image_new, box_new_list]
         return image_with_boxes
 
 
     def cal_rotate_box(self, box_list, angle, ori_center, new_center):
-        # box = [x0, y0, x1, y1, x2, y2, x3, y3]
-        # image_shape - [width, height]
+        """
+        计算【点序列】旋转变换坐标
+        :param box_list: 点序列
+        :param angle: 变换角度
+        :param ori_center: 源图像中心点
+        :param new_center: 变换后图像中心点
+        :return:
+        """
         box_list_new = []
         for (cls_type, box) in box_list:
             box_new = []
@@ -162,8 +160,7 @@ class ImageEnhance():
 
 
     def cal_rotate_coordinate(self, x_ori, y_ori, angle, ori_center, new_center):
-        # box = [x0, y0, x1, y1, x2, y2, x3, y3]
-        # image_shape - [width, height]
+        """ 计算点旋转变换坐标 """
         x_0 = x_ori - ori_center[0]
         y_0 = ori_center[1] - y_ori
         x_new = x_0 * math.cos(angle) - y_0 * math.sin(angle) + new_center[0]
@@ -233,7 +230,7 @@ class ImageEnhance():
             box_new_list.append((cls_type, box))
 
         # 显示变换差异
-        self.display_rotate(image_new, box_ori_list, box_new_list)
+        self.display_diff(image_new, box_ori_list, box_new_list)
 
         image_with_boxes = [image_new, box_new_list]
         return image_with_boxes
@@ -247,7 +244,7 @@ if __name__ == "__main__":
     image_res = cv2.imread(img_test_path)
     image_roi = cv2.imread('./test.png')
     print(image_res.shape)
-    image_with_boxes = a.perspective_tranform(image_res, label_box_list=[[1,[10,10,10,362,362,10,362,362]]])
+    image_with_boxes = a.perspective_tranform(image_res)
 
 
 
