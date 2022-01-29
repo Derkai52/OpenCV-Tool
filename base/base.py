@@ -6,6 +6,9 @@ import os
 
 import shutil
 
+import time
+
+import math
 
 VIDEO_PATH = '../resource/test.mp4'  # 视频地址
 EXTRACT_FOLDER = 'video'  # 存放帧图片的位置
@@ -77,29 +80,80 @@ class BaseTool():
         return image, (lt_x, lt_y), best_scale, baseline
 
 
+    def progress_bar(self, current, total, bar_len=35):
+        """
+        显示程序段执行进度条
+        :param current: 当前执行数
+        :param total: 总执行数
+        :param bar_len: 进度条显示长度(默认为35字符格长)
+        """
+        completed_rate = int((current / total)*bar_len) # 已完成百分比量
+
+        a = completed_rate * "▋" # 已完成进度条
+        b = "." * int(bar_len - completed_rate) # 剩余进度条
+        c = (current / total) * 100 # 当前进度点
+        # print("\r{:^3.0f}%[{}->{}]{:.2f}s".format(c, a, b, dur), end="")
+        print("\r{:^3.0f}%[{}->{}][{}/{}]".format(c, a, b, current, total), end="")
 
 
+    def extract_frames(self, video_path, dst_folder, rate=[], index=1):
+        """
+        通过视频流生成数据集
+        :param video_path: 视频流路径
+        :param dst_folder: 数据集存放路径
+        :param rate: 采集范围 eq:[13, 34] 即将采集范围限定到13%~34%进度区间的数据
+        :param index: 命名计数起始下标
 
+        参数rate 默认认为数据采集范围为所有帧;
+        你可以使用 rate=[13] 来表示将范围限定在0%~13%之间;
+        或者使用 rate=[13,27] 来表示将范围限定在13%~27%之间;
+        """
 
-    def extract_frames(self, video_path, dst_folder, index):
-        # 主操作
+        # 初始化视频流
         video = cv2.VideoCapture()
         if not video.open(video_path):
             print("can not open the video")
             exit(1)
-        count = 1
+        video_total_frame = video.get(cv2.CAP_PROP_FRAME_COUNT) # 获取视频总帧数
+
+        # 获得采集范围
+        if len(rate) == 0: # 默认数据采集范围为所有帧
+            min_rate = 0
+            max_rate = video_total_frame
+        elif len(rate) == 1:
+            min_rate = 0
+            max_rate = rate[0]
+
+        elif len(rate) == 2:
+            if rate[0] < 0:
+                raise ValueError("起始采集点需要大于0！")
+            elif rate[0] >= rate[1]:
+                raise ValueError("结束采集点需要比起始采集点大！")
+            min_rate = rate[0]
+            max_rate = rate[1]
+
+
+        min_frame = math.ceil(min_rate/100*video_total_frame)
+        max_frame = math.ceil(max_rate/100*video_total_frame)
+        task_frame = max_frame-min_frame # 实际任务量
+        count = 1 # 初始化计数器
+
+        # 采集
         while True:
-            _, frame = video.read()
-            if frame is None:
-                break
-            if count % EXTRACT_FREQUENCY == 0:
-                save_path = "{}/{:>03d}.jpg".format(dst_folder, index)
-                cv2.imwrite(save_path, frame)
-                index += 1
-            count += 1
+            ret, frame = video.read()
+            if ret:
+                if min_frame <= count and count <= max_frame: # 当处于帧采集范围内
+                    if count % EXTRACT_FREQUENCY == 0:
+                        save_path = "{}/{:>03d}.jpg".format(dst_folder, index) # 格式化生成数据文件名
+                        cv2.imwrite(save_path, frame)
+                        self.progress_bar(index, task_frame) # 终端显示进度条
+                        index += 1
+                count += 1
+
+            else:break # 读完或读空则退出
         video.release()
         # 打印出所提取帧的总数
-        print("Totally save {:d} pics".format(index - 1))
+        print("\nTotally save {:d} pics".format(index - 1))
 
 
     def main(self):
@@ -111,7 +165,7 @@ class BaseTool():
         if not os.path.exists(EXTRACT_FOLDER):
             os.mkdir(EXTRACT_FOLDER)
         # 抽取帧图片，并保存到指定路径
-        self.extract_frames(VIDEO_PATH, EXTRACT_FOLDER, 1)
+        self.extract_frames(VIDEO_PATH, EXTRACT_FOLDER, [5])
 
 
 if __name__ == '__main__':
