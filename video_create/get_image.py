@@ -28,7 +28,6 @@ class GetImage():
             print("图像信息加载错误: ",e)
 
 
-
     def display_video(self, video_path, display_mode=0, video_fps=100):
         """
         显示视频流
@@ -59,7 +58,7 @@ class GetImage():
 
                 if (cv2.waitKey(int(1000/video_fps+0.5)) & 0xFF) == ord('q'): # 准确到整数位的帧率上限控制
                     break
-                # print("FPS:{}".format(1000/(time.time()-start_time)))
+
                 fps = (fps + (1. / (time.time() - start_time))) / 2
                 print("FPS:",fps)
             else:
