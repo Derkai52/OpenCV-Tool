@@ -20,6 +20,7 @@ EXTRACT_FREQUENCY = 1  # 帧提取频率
 # # 若导入基础工具库
 # if "base" in sys.modules:
 #     modePutText(image, "Origin Image")
+
 class BaseTool():
     def __init__(self):
         pass
