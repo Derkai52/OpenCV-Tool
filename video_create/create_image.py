@@ -9,6 +9,8 @@ import numpy as np
 import math, sys
 
 
+
+
 class ImageEnhance():
 
     def add_background_randomly(self, image, background, box_list=[]):
@@ -107,6 +109,9 @@ class ImageEnhance():
         width_new = int((height_ori * sin) + (width_ori * cos))
         height_new = int((height_ori * cos) + (width_ori * sin))
 
+        width_new = 640
+        height_new = 480
+
         # 调整旋转矩阵以考虑平移
         rotation_matrix[0, 2] += (width_new / 2) - x_center_ori
         rotation_matrix[1, 2] += (height_new / 2) - y_center_ori
@@ -134,6 +139,72 @@ class ImageEnhance():
 
         image_with_boxes = [image_new, box_new_list]
         return image_with_boxes
+
+
+    def rotate_image_3d(self, img, angle_vari=30):
+        """ 3维图像变换 """
+
+        def rad(x):
+            return x * np.pi / 180
+
+        w, h = img.shape[0:2]
+        fov = 42
+        anglex = np.random.uniform(-angle_vari, angle_vari)
+        angley = np.random.uniform(-angle_vari, angle_vari)
+        anglez = np.random.uniform(-angle_vari + 10, angle_vari - 10)
+
+        # 镜头与图像间的距离，21为半可视角，算z的距离是为了保证在此可视角度下恰好显示整幅图像
+        z = np.sqrt(w ** 2 + h ** 2) / 2 / np.tan(rad(fov / 2))
+        # 齐次变换矩阵
+        rx = np.array([[1, 0, 0, 0],
+                       [0, np.cos(rad(anglex)), -np.sin(rad(anglex)), 0],
+                       [0, -np.sin(rad(anglex)), np.cos(rad(anglex)), 0, ],
+                       [0, 0, 0, 1]], np.float32)
+
+        ry = np.array([[np.cos(rad(angley)), 0, np.sin(rad(angley)), 0],
+                       [0, 1, 0, 0],
+                       [-np.sin(rad(angley)), 0, np.cos(rad(angley)), 0, ],
+                       [0, 0, 0, 1]], np.float32)
+
+        rz = np.array([[np.cos(rad(anglez)), np.sin(rad(anglez)), 0, 0],
+                       [-np.sin(rad(anglez)), np.cos(rad(anglez)), 0, 0],
+                       [0, 0, 1, 0],
+                       [0, 0, 0, 1]], np.float32)
+
+        r = rx.dot(ry).dot(rz)
+
+        # 四对点的生成
+        pcenter = np.array([h / 2, w / 2, 0, 0], np.float32)
+
+        p1 = np.array([0, 0, 0, 0], np.float32) - pcenter
+        p2 = np.array([w, 0, 0, 0], np.float32) - pcenter
+        p3 = np.array([0, h, 0, 0], np.float32) - pcenter
+        p4 = np.array([w, h, 0, 0], np.float32) - pcenter
+
+        dst1 = r.dot(p1)
+        dst2 = r.dot(p2)
+        dst3 = r.dot(p3)
+        dst4 = r.dot(p4)
+
+        list_dst = [dst1, dst2, dst3, dst4]
+
+        org = np.array([[0, 0],
+                        [w, 0],
+                        [0, h],
+                        [w, h]], np.float32)
+
+        dst = np.zeros((4, 2), np.float32)
+
+        # 投影至成像平面
+        for i in range(4):
+            dst[i, 0] = list_dst[i][0] * z / (z - list_dst[i][2]) + pcenter[0]
+            dst[i, 1] = list_dst[i][1] * z / (z - list_dst[i][2]) + pcenter[1]
+
+        warpR = cv2.getPerspectiveTransform(org, dst)
+
+        result = cv2.warpPerspective(img, warpR, (h, w))
+        print(h, w)
+        return result
 
 
     def cal_rotate_box(self, box_list, angle, ori_center, new_center):
@@ -230,12 +301,27 @@ class ImageEnhance():
         return image_with_boxes
 
 
+
+
+
 if __name__ == "__main__":
     image_test = ImageEnhance()
     img_test_path = './test.png' # 测试图像路径
     image = cv2.imread(img_test_path)
 
-    image_with_boxes = image_test.perspective_tranform(image) # 测试透视变换
+    import time
 
-    cv2.imshow("test",image_with_boxes[0])
-    cv2.waitKey(0)
+    start_time = time.time() # 初始化时间戳
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    out = cv2.VideoWriter("rotate_image_3d.avi", fourcc, 1, (372,372), True)
+    while True:
+        t = time.time()-start_time
+        angles = (57.295*(0.785*math.sin(1.884*t)+1.305))
+        # image_with_boxes = image_test.rotate_image(image, angle=angles) # 测试透视变换
+        image_with_boxes = image_test.rotate_image_3d(image)
+        # out.write(image_with_boxes)
+        cv2.imshow("test",image_with_boxes)
+        if cv2.waitKey(1000) & 0xFF == ord('q'):
+            out.release()
+            cv2.destroyAllWindows()
+            break

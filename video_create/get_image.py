@@ -78,6 +78,7 @@ class GetImage():
     def from_picture(self, picture_path):
         """ 从本地图片中获取图像:retrun:图片图像 """
         if os.path.exists(picture_path):
+            print(3)
             image = cv2.imread(picture_path)
             return image
         raise FileNotFoundError("未能找到图像文件")

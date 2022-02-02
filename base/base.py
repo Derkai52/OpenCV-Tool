@@ -157,6 +157,31 @@ class BaseTool():
         print("\nTotally save {:d} pics".format(index - 1))
 
 
+    def video2video(self, frame_ori=0, save_path="test.avi", save_format='XVID', save_fps=20, save_size=(1920,1080)):
+        """ 视频的转换 """
+        cap = cv2.VideoCapture(frame_ori)
+
+        fourcc = cv2.VideoWriter_fourcc(*save_format)
+
+        out = cv2.VideoWriter(save_path, fourcc, save_fps, save_size, True)
+
+        while (cap.isOpened()):
+            ret, frame = cap.read()
+            if ret == True:
+
+                cv2.imshow('frame', frame)
+                out.write(frame)
+
+                if cv2.waitKey(10) & 0xFF == ord('q'):
+                    break
+            else:
+                break
+
+        cap.release()
+        out.release()
+        cv2.destroyAllWindows()
+
+
     def main(self):
         # 递归删除之前存放帧图片的文件夹，并新建一个
         try:
