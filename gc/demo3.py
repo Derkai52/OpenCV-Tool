@@ -116,7 +116,7 @@ def main(img):
 if __name__ == "__main__":
     # 样例图片 (从命令行中填入)
     # image_path = sys.argv[1]
-    image_path = "rotate_image.png"
+    image_path = "rotate_test1.png"
     # 样例图片 (在代码中填入)
     # img = cv2.imread('cfs_samples.jpg')
     img = cv2.imread(image_path)

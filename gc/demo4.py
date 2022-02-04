@@ -11,7 +11,7 @@ import sys
 
 # 读入图片
 # img_path = sys.argv[1]
-img_path = "rotate_image.png"
+img_path = "rotate_test1.png"
 img = cv2.imread(img_path)
 # img = cv2.imread('little_chess.png')
 if img is None:
@@ -28,7 +28,7 @@ print("ROI范围为: \nX范围{}\nY范围{}".format((x1,x2), (y1,y2)))
 
 img = img[y1:y2, x1:x2]
 cv2.imshow("ROI", img)
-cv2.waitKey(0)
+cv2.waitKey(1)
 
 # 将图片转换为HSV格式
 img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
