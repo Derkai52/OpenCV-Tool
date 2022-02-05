@@ -109,7 +109,7 @@ def main(img):
     while cv2.waitKey(0) != ord('e'):
         continue
 
-    # cv2.imwrite('tmp_bin.png', mask)
+    cv2.imwrite('tmp_bin.png', mask)
     cv2.destroyAllWindows()
 
 
