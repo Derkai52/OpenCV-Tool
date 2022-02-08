@@ -269,6 +269,29 @@ class ImageEnhance():
         y3 = random.randint(delta_height + min_height, max_height)
         points_dst = np.float32([[x0, y0], [x1, y1], [x2, y2], [x3, y3]])
 
+        # if True:
+            # bbox = cv2.selectROI(image, False)
+            # x0 = bbox[0]
+            # y0 = bbox[1]
+            #
+            # x1 = bbox[0]+bbox[2]
+            # y1 = bbox[1]
+            #
+            # x2 = bbox[0]+bbox[2]
+            # y2 = bbox[1]+bbox[3]
+            #
+            # x3 = bbox[0]
+            # y3 = bbox[1]+bbox[3]
+            # cv2.circle(image, (int(x0), int(y0)), 4,(255,0,0),5)  # 在正方形内部点一点（为了给闭操作用）
+            # cv2.circle(image, (int(x1), int(y1)), 4,(255,0,0),5)  # 在正方形内部点一点（为了给闭操作用）
+            # cv2.circle(image, (int(x2), int(y2)), 4,(255,0,0),5)  # 在正方形内部点一点（为了给闭操作用）
+            # cv2.circle(image, (int(x3), int(y3)), 4,(255,0,0),5)  # 在正方形内部点一点（为了给闭操作用）
+
+
+
+
+
+
         M = cv2.getPerspectiveTransform(points_src, points_dst)
         image_res = cv2.warpPerspective(image, M, (max_width, max_height))
         # cut
@@ -318,9 +341,9 @@ if __name__ == "__main__":
         t = time.time()-start_time
         angles = (57.295*(0.785*math.sin(1.884*t)+1.305))
         # image_with_boxes = image_test.rotate_image(image, angle=angles) # 测试透视变换
-        image_with_boxes = image_test.rotate_image_3d(image)
+        image_with_boxes = image_test.perspective_tranform(image)
         # out.write(image_with_boxes)
-        cv2.imshow("test",image_with_boxes)
+        cv2.imshow("test",image_with_boxes[0])
         if cv2.waitKey(1000) & 0xFF == ord('q'):
             out.release()
             cv2.destroyAllWindows()
