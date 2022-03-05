@@ -1,6 +1,6 @@
 import numpy as np
 
-def _polygon_area(poly):
+def polygon_area(poly):
     """
     计算多边形的面积
     原理：https://zhuanlan.zhihu.com/p/110025234
@@ -12,4 +12,4 @@ def _polygon_area(poly):
             (poly[0][0] - poly[3][0]) * (poly[0][1] + poly[3][1])]
     return float(np.sum(edge) / 2.)
 
-# print(_polygon_area([[0,4],[4,4],[4,0],[0,0]]))
+# print(polygon_area([[0,4],[4,4],[4,0],[0,0]]))
